@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🟢</text></svg>">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Formatting Editor</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #ffffff;
+      --text: #172033;
+      --line: #d9e0ea;
+      --accent: #25d366;
+      --accent-dark: #128c7e;
+      --bubble: #e8f7df;
+      --chat: #ece6dd;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 26px 22px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: 30px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px 0;
+      font-size: 24px;
+    }
+
+    .toolbar,
+    .emoji-bar,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .toolbar {
+      margin-bottom: 14px;
+    }
+
+    .emoji-bar {
+      margin-bottom: 14px;
+    }
+
+    .actions {
+      margin-top: 16px;
+    }
+
+    button,
+    .share-link {
+      border: 1px solid #cfd7e3;
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 14px;
+      min-height: 42px;
+      cursor: pointer;
+      font-size: 15px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .15s ease, transform .15s ease;
+    }
+
+    button:hover,
+    .share-link:hover {
+      border-color: var(--accent-dark);
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #08361d;
+      font-weight: 700;
+    }
+
+    .emoji-btn {
+      min-width: 40px;
+      padding: 7px 8px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 390px;
+      resize: vertical;
+      border: 1px solid #cfd7e3;
+      border-radius: 18px;
+      padding: 16px;
+      font-size: 16px;
+      line-height: 1.6;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--accent-dark);
+      box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.12);
+    }
+
+    .preview-shell {
+      background: var(--chat);
+      border-radius: 28px;
+      min-height: 470px;
+      padding: 18px;
+    }
+
+    .preview-bubble {
+      background: var(--bubble);
+      border-radius: 22px;
+      padding: 16px;
+      min-height: 320px;
+      max-width: 520px;
+      line-height: 1.65;
+    }
+
+    .preview-bubble p {
+      margin: 0 0 12px;
+    }
+
+    .preview-bubble ul,
+    .preview-bubble ol {
+      margin: 0 0 12px 24px;
+      padding: 0;
+    }
+
+    .preview-bubble blockquote {
+      margin: 0 0 12px;
+      padding-left: 12px;
+      border-left: 4px solid #8aa08f;
+      color: #39485b;
+    }
+
+    .preview-bubble code {
+      background: rgba(15, 23, 42, 0.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-family: Consolas, monospace;
+    }
+
+    @media (max-width: 920px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>WhatsApp Formatting Editor</h1>
+    </section>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Editor</h2>
+
+        <div class="toolbar">
+          <button type="button" onclick="wrapSelection('*')"><strong>Bold</strong></button>
+          <button type="button" onclick="wrapSelection('_')"><em>Italic</em></button>
+          <button type="button" onclick="wrapSelection('~')"><s>Strike</s></button>
+          <button type="button" onclick="wrapSelection('`')"><code>Code</code></button>
+          <button type="button" onclick="applyPrefix('> ')">Quote</button>
+          <button type="button" onclick="applyPrefix('- ')">List</button>
+          <button type="button" onclick="applyOrderedList()">Numbered List</button>
+        </div>
+
+        <div class="emoji-bar">
+          <button type="button" class="emoji-btn" onclick="insertEmoji('🇬🇧')">🇬🇧</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('✅')">✅</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('❌')">❌</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('🔗')">🔗</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('📢')">📢</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('🔄')">🔄</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('⚠️')">⚠️</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('📌')">📌</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('👍')">👍</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('🎧')">🎧</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('📖')">📖</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('📝')">📝</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('🗣️')">🗣️</button>
+          <button type="button" class="emoji-btn" onclick="insertEmoji('💡')">💡</button>
+        </div>
+
+        <textarea id="editor" placeholder="Write your message here...">Hello team,
+
+*Important*
+Meeting at _3:00 p.m._
+
+> Bring updates
+
+1. Task one
+2. Task two
+
+`Code example`</textarea>
+
+        <div class="actions">
+          <button type="button" class="primary" onclick="copyText()">Copy</button>
+          <button type="button" onclick="clearText()">Clear</button>
+          <a id="waLink" class="share-link" href="#" target="_blank" rel="noreferrer">Share on WhatsApp</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Preview</h2>
+        <div class="preview-shell">
+          <div class="preview-bubble" id="preview"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    var editor = document.getElementById("editor");
+    var preview = document.getElementById("preview");
+    var waLink = document.getElementById("waLink");
+
+    function escapeHtml(text) {
+      return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function renderInline(text) {
+      var html = escapeHtml(text);
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      html = html.replace(/\*([^*]+)\*/g, "<strong>$1</strong>");
+      html = html.replace(/_([^_]+)_/g, "<em>$1</em>");
+      html = html.replace(/~([^~]+)~/g, "<s>$1</s>");
+      return html;
+    }
+
+    function parseBlocks(text) {
+      var lines = text.split("\n");
+      var blocks = [];
+      var i = 0;
+
+      while (i < lines.length) {
+        var line = lines[i];
+
+        if (/^\s*>\s?/.test(line)) {
+          var quote = [];
+          while (i < lines.length && /^\s*>\s?/.test(lines[i])) {
+            quote.push(lines[i].replace(/^\s*>\s?/, ""));
+            i++;
+          }
+          blocks.push({ type: "quote", lines: quote });
+          continue;
+        }
+
+        if (/^\s*[-*]\s+/.test(line)) {
+          var ulItems = [];
+          while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+            ulItems.push(lines[i].replace(/^\s*[-*]\s+/, ""));
+            i++;
+          }
+          blocks.push({ type: "ul", items: ulItems });
+          continue;
+        }
+
+        if (/^\s*\d+\.\s+/.test(line)) {
+          var olItems = [];
+          while (i < lines.length && /^\s*\d+\.\s+/.test(lines[i])) {
+            olItems.push(lines[i].replace(/^\s*\d+\.\s+/, ""));
+            i++;
+          }
+          blocks.push({ type: "ol", items: olItems });
+          continue;
+        }
+
+        if (line.trim() === "") {
+          blocks.push({ type: "space" });
+          i++;
+          continue;
+        }
+
+        var paragraph = [];
+        while (
+          i < lines.length &&
+          lines[i].trim() !== "" &&
+          !/^\s*>\s?/.test(lines[i]) &&
+          !/^\s*[-*]\s+/.test(lines[i]) &&
+          !/^\s*\d+\.\s+/.test(lines[i])
+        ) {
+          paragraph.push(lines[i]);
+          i++;
+        }
+        blocks.push({ type: "p", text: paragraph.join("\n") });
+      }
+
+      return blocks;
+    }
+
+    function updatePreview() {
+      var text = editor.value;
+      var blocks = parseBlocks(text);
+      var html = "";
+
+      for (var i = 0; i < blocks.length; i++) {
+        var block = blocks[i];
+
+        if (block.type === "space") {
+          html += '<div style="height:8px"></div>';
+        } else if (block.type === "quote") {
+          var quoteHtml = "";
+          for (var q = 0; q < block.lines.length; q++) {
+            quoteHtml += "<div>" + renderInline(block.lines[q]) + "</div>";
+          }
+          html += "<blockquote>" + quoteHtml + "</blockquote>";
+        } else if (block.type === "ul") {
+          var ulHtml = "";
+          for (var u = 0; u < block.items.length; u++) {
+            ulHtml += "<li>" + renderInline(block.items[u]) + "</li>";
+          }
+          html += "<ul>" + ulHtml + "</ul>";
+        } else if (block.type === "ol") {
+          var olHtml = "";
+          for (var o = 0; o < block.items.length; o++) {
+            olHtml += "<li>" + renderInline(block.items[o]) + "</li>";
+          }
+          html += "<ol>" + olHtml + "</ol>";
+        } else {
+          html += "<p>" + renderInline(block.text).replace(/\n/g, "<br>") + "</p>";
+        }
+      }
+
+      preview.innerHTML = html || '<p>The preview will appear here...</p>';
+      waLink.href = "https://wa.me/?text=" + encodeURIComponent(text);
+    }
+
+    function wrapSelection(token) {
+      var start = editor.selectionStart;
+      var end = editor.selectionEnd;
+      var value = editor.value;
+      var selected = value.slice(start, end);
+
+      if (!selected) {
+        var insertText = token + "text" + token;
+        editor.value = value.slice(0, start) + insertText + value.slice(end);
+        editor.focus();
+        editor.setSelectionRange(start + token.length, start + token.length + 4);
+      } else {
+        editor.value = value.slice(0, start) + token + selected + token + value.slice(end);
+        editor.focus();
+        editor.setSelectionRange(start + token.length, end + token.length);
+      }
+
+      updatePreview();
+    }
+
+    function normalizeLine(line) {
+      return line.replace(/^([>\-*]\s+|\d+\.\s+)/, "");
+    }
+
+    function applyPrefix(prefix) {
+      var start = editor.selectionStart;
+      var end = editor.selectionEnd;
+      var value = editor.value;
+      var blockStart = value.lastIndexOf("\n", start - 1) + 1;
+      var blockEnd = value.indexOf("\n", end);
+      if (blockEnd === -1) blockEnd = value.length;
+
+      var chunk = value.slice(blockStart, blockEnd);
+      var updated = chunk.split("\n").map(function(line) {
+        if (!line.trim()) return line;
+        return prefix + normalizeLine(line);
+      }).join("\n");
+
+      editor.value = value.slice(0, blockStart) + updated + value.slice(blockEnd);
+      editor.focus();
+      editor.setSelectionRange(blockStart, blockStart + updated.length);
+      updatePreview();
+    }
+
+    function applyOrderedList() {
+      var start = editor.selectionStart;
+      var end = editor.selectionEnd;
+      var value = editor.value;
+      var blockStart = value.lastIndexOf("\n", start - 1) + 1;
+      var blockEnd = value.indexOf("\n", end);
+      if (blockEnd === -1) blockEnd = value.length;
+
+      var chunk = value.slice(blockStart, blockEnd);
+      var lines = chunk.split("\n");
+      var counter = 1;
+
+      var updated = lines.map(function(line) {
+        if (!line.trim()) return line;
+        var clean = normalizeLine(line);
+        var result = counter + ". " + clean;
+        counter++;
+        return result;
+      }).join("\n");
+
+      editor.value = value.slice(0, blockStart) + updated + value.slice(blockEnd);
+      editor.focus();
+      editor.setSelectionRange(blockStart, blockStart + updated.length);
+      updatePreview();
+    }
+
+    function insertEmoji(emoji) {
+      var start = editor.selectionStart;
+      var end = editor.selectionEnd;
+      var value = editor.value;
+
+      editor.value = value.slice(0, start) + emoji + value.slice(end);
+      editor.focus();
+      editor.setSelectionRange(start + emoji.length, start + emoji.length);
+      updatePreview();
+    }
+
+    function copyText() {
+      navigator.clipboard.writeText(editor.value).then(function() {
+        alert("Copied");
+      }).catch(function() {
+        alert("Could not copy automatically");
+      });
+    }
+
+    function clearText() {
+      editor.value = "";
+      editor.focus();
+      updatePreview();
+    }
+
+    editor.addEventListener("input", updatePreview);
+    updatePreview();
+  </script>
+</body>
+</html>
